@@ -1,54 +1,69 @@
 # Harbor for macOS
 
-**Created by darils.**
-A native macOS development tool for Laravel, inspired by Laragon.
+Created by darils.
 
-Manage your projects, PHP, Composer, databases, queues, Vite, logs, and other development tools — all in one place.
+New to Harbor? Start with the [step-by-step tutorial](TUTORIAL.md).
 
-## Downloads
+A native Laravel development manager inspired by Laragon. Built with SwiftUI, Foundation, and a small process-group helper. No JavaScript desktop runtime or third-party Swift dependencies.
 
-- [Download Harbor for Apple silicon Macs](Harbor-macOS-arm64.zip?raw=true)
-- [Download the complete source code](Harbor-source.zip?raw=true)
+## Open the app
 
-The source archive contains the complete Swift package, all source folders, tests, build scripts, documentation, and MIT license. Extract it before building; the source tree is packaged in the archive rather than expanded at this repository's root.
+Build the app with `bash scripts/build.sh`, then open `Harbor.app` beside this source folder. The build targets the Mac's architecture and macOS 13 or later. You can move the app to Applications yourself. It is locally ad-hoc signed, not Developer ID signed or notarized for public distribution.
 
-## Run Harbor
+Harbor detects Homebrew in `/opt/homebrew` and `/usr/local`. It also detects PHP and Composer from an existing Laravel Herd installation.
 
-1. Download and extract `Harbor-macOS-arm64.zip`.
-2. Open `Harbor.app`. You may move it to Applications.
-3. Review your tools in Services, then create or import a Laravel project.
+1. Open **Services** to review installed tools. Install any missing services you want.
+2. Create a Laravel project or import a folder containing `artisan` and `composer.json`.
+3. For imported projects, use **More → Install Composer dependencies** if needed. Use **Install npm dependencies** before starting Vite.
+4. Start the web server and open the site. Start queues, scheduler, and other processes when your app needs them.
+5. Configure the project's `.env` for its own database, mail, queue, and cache connections.
 
-Requires an Apple silicon Mac running macOS 13 or later. This is a locally ad-hoc signed development build; it is not Developer ID signed or notarized for public distribution.
+## Implemented
 
-## Build from source
+| Area | Available in Harbor |
+| --- | --- |
+| Projects | Create via Composer, import, search, persistent registry, remove from list without deleting files |
+| PHP | Homebrew version installation and selection per project; existing Herd default PHP detection |
+| Databases | Install/start/stop MySQL and PostgreSQL through Homebrew; SQLite works through Laravel |
+| Supporting services | Redis, Mailpit and optional Nginx installation/start/stop |
+| Development | Laravel server, Vite, queue worker, scheduler, Horizon, Reverb |
+| Artisan | Arbitrary command arguments, common shortcuts, confirmation for custom/state-changing commands |
+| Files | Finder, project terminal, `.env` and Laravel log opening |
+| Dependencies | Composer and npm install with live output |
+| Domains and HTTPS | Optional Valet setup/link/secure workflows in Terminal |
+| Lifecycle | Menu bar controls, all-project web start, stop project jobs, shutdown of owned process groups |
+| Logs | Live output, command exit status, copy and reveal log files |
 
-Download and extract `Harbor-source.zip`. In the extracted `Harbor` folder, run:
+## Scope and limitations
+
+This is a working 0.1 development build, not complete Laragon feature parity. Runtime binaries are supplied by your Mac, Homebrew, or Herd; Harbor is not a portable bundled PHP distribution.
+
+- Horizon and Reverb controls require their Composer packages and project configuration. Starter kits, authentication, Sail, Pint, Pest, and other Laravel tools are available through the project terminal/Artisan workbench; they do not have dedicated setup screens. Sail needs Docker.
+- Local domains and certificates are delegated to Valet. Installing Valet changes system DNS/Nginx configuration and can conflict with Herd or other local servers. On a Mac already using Herd, use Herd's domain/certificate management instead of installing another Valet setup. Harbor's selected PHP applies to Harbor's commands; Valet/Herd manage their own site runtime.
+- Harbor's web server uses `127.0.0.1:<port>`, Vite uses `<port+1000>`, and Reverb uses `<port+2000>`. Set Reverb environment variables accordingly. Reserved project ports are checked for overlap. External port conflicts appear as command failures in logs; Harbor does not claim a process is HTTP-ready just because it is running.
+- Homebrew services are shared system tools, not isolated Harbor instances. **Start** uses `brew services run` without enabling login startup. Services keep running when Harbor quits. Existing service configurations, including their bind addresses and credentials, remain in effect.
+- Project processes stop when Harbor quits normally. Force-killing Harbor can leave processes running. A closed window keeps Harbor active in the menu bar.
+- No built-in database browser, database/user creation UI, remote sharing/tunnels, deployment, auto-update, or full PHP extension manager yet.
+- The log folder persists across sessions and is not automatically pruned. The live text view retains the latest 100–120 KB; complete output stays in the log file. Logs can contain project data.
+
+## Build and checks
+
+Requires Apple command line developer tools with Swift 5.9 or later:
 
 ```sh
 bash scripts/check.sh
 bash scripts/build.sh
 ```
 
-Apple's command line developer tools with Swift 5.9 or later are required. The build produces `Harbor.app` beside the extracted source folder.
+The build script creates `../Harbor.app`, an app icon, and a local ad-hoc signature. Build on an Intel Mac to produce an Intel binary. The checks use a standalone Swift executable, so full Xcode and XCTest are not required. Checks cover argument handling, shell quoting, project validation, port conflicts, persistence and corruption handling, process groups, descendant cleanup, and failed executable launches.
 
-## Features
+Application data defaults to `~/Library/Application Support/Harbor`. Developers can set `HARBOR_DATA_DIR` to an isolated folder for testing. The app never runs a project command through a shell; Terminal scripts quote filesystem paths explicitly. Importing a project does not execute it. Creating projects and installing dependencies intentionally runs Composer/npm scripts.
 
-- Laravel project creation and import
-- PHP selection and Composer/npm dependency installation
-- Homebrew controls for MySQL, PostgreSQL, Redis, Mailpit, and Nginx
-- Laravel web server, queues, scheduler, Vite, and optional Horizon/Reverb controls
-- Artisan workbench, project terminals, environment-file access, and live logs
-- Optional Terminal workflows for Valet domains and HTTPS
-- Existing Laravel Herd PHP and Composer detection
+## References
 
-## Development status
-
-Version 0.1 is a working first release. Runtime tools are supplied by Homebrew or your existing installation. It is not full Laragon feature parity: a database browser, remote sharing, and dedicated starter-kit setup screens are not included. Horizon/Reverb need their project packages; Valet setup is separate and can conflict with an existing Herd installation.
-
-See [VALIDATION.md](VALIDATION.md) for completed checks. The source archive's README contains full setup details and limitations.
-
-## License
-
-[MIT License](LICENSE), copyright 2026 darils.
+- [Laragon features](https://laragon.org/docs)
+- [Laravel documentation](https://laravel.com/docs)
+- [Laravel Valet](https://laravel.com/docs/valet)
+- [Homebrew service commands](https://docs.brew.sh/Manpage#services-subcommand)
 
 Harbor is independent and is not affiliated with Laravel or Laragon.
