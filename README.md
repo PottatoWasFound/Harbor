@@ -1,8 +1,9 @@
 # Harbor for macOS
 
 **Created by darils.**
+A native macOS development tool for Laravel, inspired by Laragon.
 
-A native macOS development manager for Laravel, inspired by Laragon. Manage projects, PHP, Composer, databases, queues, Vite, and logs in one place.
+Manage your projects, PHP, Composer, databases, queues, Vite, logs, and other development tools — all in one place.
 
 ## Downloads
 
